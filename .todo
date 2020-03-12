@@ -1,2 +1,3 @@
 - Setup cors
 - Setup Parameter sanitization
+- Install sharp for image resizing
