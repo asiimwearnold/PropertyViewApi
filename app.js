@@ -47,6 +47,9 @@ app.use(xss());
 // Prevent Parameter Pollution
 app.use(hpp({ whitelist: ["duration"] }));
 
+// Serve static files in public folder
+app.use(express.static("public"));
+
 // Property Routes
 app.use("/api/v1/property", propertyRouter);
 
