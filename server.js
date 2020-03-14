@@ -13,7 +13,7 @@ if (process.env.NODE_ENV === "test")
 else dotenv.config({ path: "./config.env" });
 //const DB = process.env.DATABASE.replace("<PASSWORD>", process.env.PASSWORD);
 
-const DB = process.env.DATABASE_LOCAL;
+const DB = process.env.DATABASE;
 
 mongoose
   .connect(DB, {
@@ -22,7 +22,8 @@ mongoose
     useFindAndModify: false,
     useUnifiedTopology: true
   })
-  .then(con => console.log("Successful Database Connection"));
+  .then(con => console.log("Successful Database Connection"))
+  .catch(err => console.log(err));
 
 const app = require("./app");
 

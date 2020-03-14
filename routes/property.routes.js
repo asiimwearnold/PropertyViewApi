@@ -1,13 +1,17 @@
 const express = require("express");
 
-const propertyController = require("../controllers/property.controller");
-
 const router = express.Router();
+
+const propertyController = require("../controllers/property.controller");
 
 router
   .route("/")
   .get(propertyController.getAllProperty)
-  .post(propertyController.createProperty);
+  .post(
+    propertyController.uploadImages,
+    propertyController.resizeImages,
+    propertyController.createProperty
+  );
 
 router
   .route("/within-radius/:distance/center/:pin/unit/:unit")
