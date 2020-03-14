@@ -6,7 +6,7 @@ const propertySchema = new mongoose.Schema({
     required: true
   },
   coverImage: String,
-  images: Array,
+  images: [String],
   location: {
     type: String,
     required: true

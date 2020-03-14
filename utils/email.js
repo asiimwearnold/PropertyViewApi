@@ -5,15 +5,21 @@ const htmlToText = require("html-to-text");
 module.exports = class Email {
   constructor(user, url) {
     this.to = user.email;
-    this.firstName = user.firstName;
+    this.firstName = user.firstname;
     this.url = url;
-    this.from = `Support at Prpo <${process.env.EMAIL_FROM}>`;
+    this.from = `Support at ProperyView <${process.env.EMAIL_FROM}>`;
   }
 
   newTransport() {
     // Create transporter
     if (process.env.NODE_ENV === "production") {
-      return 1;
+      return nodemailer.createTransport({
+        service: "SendGrid",
+        auth: {
+          user: process.env.SENDGRID_USERNAME,
+          pass: process.env.SENDGRID_PASS
+        }
+      });
     }
 
     return nodemailer.createTransport({
@@ -49,7 +55,7 @@ module.exports = class Email {
   }
 
   async sendWelcome() {
-    await this.send("welcome", "Welcome to prpo");
+    await this.send("welcome", "Welcome to PropertyView");
   }
 
   async sendPasswordReset() {

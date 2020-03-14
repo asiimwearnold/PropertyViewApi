@@ -3,17 +3,20 @@ const Property = require("../models/property.model");
 const resHandler = require("./responseHandler");
 const AppError = require("../utils/app-error");
 const multer = require("multer");
+const sharp = require("sharp");
 
-const multerStorage = multer.diskStorage({
-  destination: (req, file, callback) => {
-    callback(null, "public/img/property");
-  },
-  filename: (req, file, callback) => {
-    // Get file type for example image/jpg split it and extract the file extension
-    const extension = file.mimetype.split("/")[1];
-    callback(null, `${req.user.id}-${Date.now()}.${extension}`);
-  }
-});
+// const multerStorage = multer.diskStorage({
+//   destination: (req, file, callback) => {
+//     callback(null, "public/img/property");
+//   },
+//   filename: (req, file, callback) => {
+//     // Get file type for example image/jpg split it and extract the file extension
+//     const extension = file.mimetype.split("/")[1];
+//     callback(null, `property-${Date.now()}.${extension}`);
+//   }
+// });
+
+const multerStorage = multer.memoryStorage();
 
 const multerFilter = (req, file, callback) => {
   if (file.mimetype.startsWith("image")) {
@@ -26,14 +29,47 @@ const multerFilter = (req, file, callback) => {
   }
 };
 
-const resizePropertyPhoto = req => {
-  if (!req.file) return next();
-};
-
 // Configure Multer upload
 const upload = multer({
   storage: multerStorage,
   fileFilter: multerFilter
+});
+
+exports.uploadImages = upload.fields([
+  { name: "coverImage", maxCount: 1 },
+  { name: "images", maxCount: 5 }
+]);
+
+exports.resizeImages = catchAsync(async (req, res, next) => {
+  if (!req.files.coverImage || !req.files.images) return next();
+
+  // Get the cover Images
+  req.body.coverImage = `property-cover-${Date.now()}.jpeg`;
+
+  await sharp(req.files.coverImage[0].buffer)
+    .resize(500, 500)
+    .toFormat("jpeg")
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/property/${req.body.coverImage}`);
+
+  // Get all the other images
+  req.body.images = [];
+
+  await Promise.all(
+    req.files.images.map(async (file, index) => {
+      const filename = `property-${Date.now()}-${index + 1}.jpeg`;
+
+      await sharp(file.buffer)
+        .resize(2000, 1333)
+        .toFormat("jpeg")
+        .jpeg({ quality: 90 })
+        .toFile(`public/img/property/${filename}`);
+
+      req.body.images.push(filename);
+    })
+  );
+
+  next();
 });
 
 // TODO Delete this after refactoring
@@ -104,13 +140,12 @@ exports.updateProperty = resHandler.updateOne(Property, document);
 exports.deleteProperty = resHandler.deleteOne(Property, document);
 
 exports.createProperty = catchAsync(async (req, res, next) => {
-  upload.single("coverImage");
-  console.log(req.file);
-  console.log(req.body);
+  if (req.file) req.body.coverImage = req.file.filename;
 
   const newProperty = await Property.create({
     description: req.body.description,
-    coverImages: req.file.filename,
+    coverImage: req.body.coverImage,
+    images: req.body.images,
     location: req.body.location,
     price: req.body.price,
     numberOfRooms: req.body.numberOfRooms,

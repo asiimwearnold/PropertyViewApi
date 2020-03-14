@@ -17,7 +17,6 @@ const userSchema = new mongoose.Schema({
   },
   properties: Array,
   isVerified: {
-    required: true,
     default: false
   },
   photo: String,

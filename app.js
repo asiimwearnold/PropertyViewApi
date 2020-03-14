@@ -36,6 +36,7 @@ app.options("*", cors());
 
 // Parse request data in the request body into json
 app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true }));
 
 // Data Sanitization from NoSQL injections
 app.use(mongoSanitize());
