@@ -65,5 +65,8 @@
     ],
     "cache": false,
     "report-dir": "./tests/report"
+  },
+  "engines": {
+    "node": ">=10.16.0"
   }
 }
